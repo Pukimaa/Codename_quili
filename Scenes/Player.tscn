@@ -1,0 +1,142 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Assets/Sprites/Player.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=12]
+script/source = "extends KinematicBody2D
+
+const GRAVITY = 400
+const SPEED = 60
+const JUMP_POWER = 150
+const UP_VECTOR = Vector2(0, -1)
+
+var movement = Vector2()
+
+func _ready():
+	pass
+
+func _process(delta):
+	movement.x = 0 
+	movement.y += GRAVITY * delta
+	
+	check_key_input()
+	
+	movement = move_and_slide(movement, UP_VECTOR)	
+	
+	set_animation()
+	
+func check_key_input():
+	if Input.is_action_pressed(\"left\"):
+		movement.x = - 1 * SPEED
+		
+	if Input.is_action_pressed(\"right\"):
+		movement.x = 1 * SPEED	
+		
+	if Input.is_action_just_pressed(\"jump\") and is_on_floor():
+		movement.y = -JUMP_POWER	
+		
+func set_animation():
+	if movement.x < 0:
+		$Sprite.flip_h = true
+		$AnimationPlayer.play(\"walk\")
+		
+	if movement.x > 0:
+		$Sprite.flip_h = false
+		$AnimationPlayer.play(\"walk\")
+		
+	if movement.x == 0:
+		$AnimationPlayer.play(\"idle\")
+		
+	if is_in_air():
+		$AnimationPlayer.play(\"air\")
+		
+func is_in_air():
+	return is_on_floor() == false
+"
+
+[sub_resource type="RectangleShape2D" id=13]
+extents = Vector2( 35.1053, 2.1293 )
+
+[sub_resource type="Animation" id=14]
+resource_name = "air"
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ 8 ]
+}
+
+[sub_resource type="Animation" id=15]
+length = 0.7
+loop = true
+step = 1.0
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0, 4 ]
+}
+
+[sub_resource type="Animation" id=16]
+length = 0.8
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 4, 8 ]
+}
+
+[sub_resource type="CircleShape2D" id=17]
+radius = 1.07088
+
+[node name="Player" type="KinematicBody2D"]
+position = Vector2( 36.642, 40.978 )
+scale = Vector2( 0.8, 0.8 )
+script = SubResource( 12 )
+
+[node name="Sprite" type="Sprite" parent="."]
+texture = ExtResource( 1 )
+vframes = 8
+hframes = 8
+frame = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2( 0.087059, 3.61535 )
+scale = Vector2( -0.120016, -2.0965 )
+shape = SubResource( 13 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/air = SubResource( 14 )
+anims/idle = SubResource( 15 )
+anims/walk = SubResource( 16 )
+
+[node name="Camera2D" type="Camera2D" parent="."]
+visible = false
+rotation = 3.14159
+scale = Vector2( 2.63158, 4.44444 )
+current = true
+editor_draw_limits = true
+editor_draw_drag_margin = true
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="."]
+position = Vector2( 0.208801, 7.13415 )
+shape = SubResource( 17 )
