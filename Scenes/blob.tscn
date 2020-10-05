@@ -20,6 +20,7 @@ const UP_VECTOR = Vector2(0, -1)
 var movement = Vector2(SPEED, 0)
 
 func _ready():
+	$AnimatedSprite.play(\"walk\")
 	pass
 
 func _physics_process(delta):
@@ -29,18 +30,22 @@ func _physics_process(delta):
 		movement.y = 0
 	
 	move_and_slide_with_snap(movement, Vector2(0, 1), UP_VECTOR)
+
+	if is_on_wall():
+		movement.x *= -1 
+		$AnimatedSprite.flip_h = !$AnimatedSprite.flip_h
 "
 
 [sub_resource type="SpriteFrames" id=2]
 animations = [ {
-"frames": [ ExtResource( 7 ), ExtResource( 6 ), ExtResource( 8 ), ExtResource( 1 ) ],
-"loop": true,
-"name": "walk",
-"speed": 5.0
-}, {
 "frames": [ ExtResource( 2 ), ExtResource( 5 ), ExtResource( 3 ) ],
 "loop": false,
 "name": "die",
+"speed": 5.0
+}, {
+"frames": [ ExtResource( 7 ), ExtResource( 6 ), ExtResource( 8 ), ExtResource( 1 ) ],
+"loop": true,
+"name": "walk",
 "speed": 5.0
 }, {
 "frames": [ ExtResource( 4 ) ],

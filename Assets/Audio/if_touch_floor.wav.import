@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/if_touch_floor.wav-11b75d1b2eb2d5fa4b0825e2626c94be.sample"
+
+[deps]
+
+source_file="res://Assets/Audio/if_touch_floor.wav"
+dest_files=[ "res://.import/if_touch_floor.wav-11b75d1b2eb2d5fa4b0825e2626c94be.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0
