@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Assets/Sprites/Player.png" type="Texture" id=1]
 
@@ -20,6 +20,7 @@ func _process(delta):
 	movement.y += GRAVITY * delta
 	
 	check_key_input()
+	check_for_stomp()
 	
 	movement = move_and_slide(movement, UP_VECTOR)	
 	
@@ -50,8 +51,17 @@ func set_animation():
 	if is_in_air():
 		$AnimationPlayer.play(\"air\")
 		
+		
 func is_in_air():
 	return is_on_floor() == false
+	
+func check_for_stomp():
+	for body in $HitBox.get_overlapping_bodies():
+		if body.has_method(\"on_stomp\") and body.is_alive:
+			body.on_stomp()
+			movement.y = -JUMP_POWER * 0.8
+		
+		
 "
 
 [sub_resource type="RectangleShape2D" id=2]
@@ -108,35 +118,46 @@ tracks/0/keys = {
 [sub_resource type="CircleShape2D" id=6]
 radius = 1.07088
 
+[sub_resource type="RectangleShape2D" id=7]
+extents = Vector2( 2.58212, 0.888521 )
+
 [node name="Player" type="KinematicBody2D"]
-position = Vector2( 36.642, 40.978 )
+position = Vector2( 0, -8 )
 scale = Vector2( 0.8, 0.8 )
 script = SubResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 0, -8 )
 texture = ExtResource( 1 )
 vframes = 8
 hframes = 8
-frame = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2( 0.087059, 3.61535 )
+position = Vector2( 0.087, -4.385 )
 scale = Vector2( -0.120016, -2.0965 )
 shape = SubResource( 2 )
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-anims/air = SubResource( 3 )
-anims/idle = SubResource( 4 )
-anims/walk = SubResource( 5 )
-
 [node name="Camera2D" type="Camera2D" parent="."]
 visible = false
+position = Vector2( 0, -8 )
 rotation = 3.14159
 scale = Vector2( 2.63158, 4.44444 )
 current = true
 editor_draw_limits = true
 editor_draw_drag_margin = true
 
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/air = SubResource( 3 )
+anims/idle = SubResource( 4 )
+anims/walk = SubResource( 5 )
+
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="."]
-position = Vector2( 0.208801, 7.13415 )
+position = Vector2( 0.209, -0.866 )
 shape = SubResource( 6 )
+
+[node name="HitBox" type="Area2D" parent="."]
+position = Vector2( 0, -0.500002 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox"]
+position = Vector2( -0.234, 1.034 )
+shape = SubResource( 7 )

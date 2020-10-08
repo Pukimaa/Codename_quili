@@ -14,43 +14,89 @@ script/source = "extends KinematicBody2D
 
 const GRAVITY = 400
 const SPEED = 10
-const JUMP_POWER = 150
+const JUMP_POWER = 100
 const UP_VECTOR = Vector2(0, -1)
 
+onready var sprite = $AnimatedSprite
+onready var ray_left = $RayCastLeft
+onready var ray_right = $RayCastRight
+
 var movement = Vector2(SPEED, 0)
+var is_alive = true
+var jump_x = 0
+var direction = 1
 
 func _ready():
-	$AnimatedSprite.play(\"walk\")
+	sprite.play(\"walk\")
 	pass
 
 func _physics_process(delta):
+	if is_alive == false:
+		return
+
 	movement.y += GRAVITY * delta
 	
 	if is_on_floor():
-		movement.y = 0
+		if sprite.animation == \"jump\":
+			on_landing()
+		else:
+			movement.y = 0
+			if is_on_wall() or is_over_abyss():
+				jump()
 	
+# warning-ignore:return_value_discarded
 	move_and_slide_with_snap(movement, Vector2(0, 1), UP_VECTOR)
+	
+	
+func on_stomp():
+	sprite.play(\"die\")
+	is_alive = false
+	
+func on_landing():
+	sprite.play(\"walk\")
+	if floor(position.x) == jump_x:
+		turn()
+		
+func turn():
+		direction *= -1
+		movement.x = SPEED * direction
+		sprite.flip_h = not sprite.flip_h
+	
+	
+func jump():
+	sprite.play(\"jump\")
+	movement.y = -JUMP_POWER
+	movement.x = SPEED * direction * 4
+	jump_x = floor(position.x)
+	
+func is_over_abyss():
+	if movement.x < 0:
+		ray_left.force_raycast_update()
+		return ray_left.get_collider() == null
+	else:
+		ray_right.force_raycast_update()
+		return ray_right.get_collider() == null
 
-	if is_on_wall():
-		movement.x *= -1 
-		$AnimatedSprite.flip_h = !$AnimatedSprite.flip_h
+func _on_AnimatedSprite_animation_finished():
+	if sprite.animation == \"die\":
+		queue_free()
 "
 
 [sub_resource type="SpriteFrames" id=2]
 animations = [ {
-"frames": [ ExtResource( 2 ), ExtResource( 5 ), ExtResource( 3 ) ],
-"loop": false,
-"name": "die",
-"speed": 5.0
-}, {
 "frames": [ ExtResource( 7 ), ExtResource( 6 ), ExtResource( 8 ), ExtResource( 1 ) ],
 "loop": true,
 "name": "walk",
 "speed": 5.0
 }, {
+"frames": [ ExtResource( 2 ), ExtResource( 5 ), ExtResource( 3 ) ],
+"loop": false,
+"name": "die",
+"speed": 20.0
+}, {
 "frames": [ ExtResource( 4 ) ],
 "loop": true,
-"name": "air",
+"name": "jump",
 "speed": 5.0
 } ]
 
@@ -65,7 +111,7 @@ script = SubResource( 1 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 frames = SubResource( 2 )
-animation = "walk"
+animation = "jump"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2( 0.526153, 5.54215 )
@@ -78,3 +124,14 @@ shape = SubResource( 4 )
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="."]
 position = Vector2( 0.00191242, 7.61552 )
 shape = SubResource( 4 )
+
+[node name="RayCastRight" type="RayCast2D" parent="."]
+position = Vector2( 7, 6 )
+exclude_parent = false
+cast_to = Vector2( 0, 2 )
+
+[node name="RayCastLeft" type="RayCast2D" parent="."]
+position = Vector2( -6, 6 )
+exclude_parent = false
+cast_to = Vector2( 0, 2 )
+[connection signal="animation_finished" from="AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]
